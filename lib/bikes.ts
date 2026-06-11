@@ -58,13 +58,6 @@ const road: BikeGeometry = {
     { d: "M380,401 L433,421", width: 8 }, // drive crank arm
     { d: "M421,424 L449,424", width: 6 }, // pedal
     { d: "M380,401 m-23,0 a23,23 0 1,0 46,0 a23,23 0 1,0 -46,0", width: 4 }, // chainring
-    { d: "M238,378 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0", width: 3.5 }, // cog
-    { d: "M376,378 L240,368", width: 2.5 }, // chain top run
-    { d: "M380,424 L254,409", width: 2.5 }, // chain bottom run
-    { d: "M244,388 L252,408", width: 4 }, // derailleur cage
-    { d: "M252,408 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0", width: 3 }, // pulley
-    { d: "M238,378 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0", width: 3 }, // rear rotor
-    { d: "M592,378 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0", width: 3 }, // front rotor
   ],
   solids: [
     // saddle: flat top, kicked tail, dropped nose
@@ -99,13 +92,6 @@ const mountain: BikeGeometry = {
     { d: "M380,382 L431,404", width: 9 }, // drive crank arm
     { d: "M419,407 L447,407", width: 7 }, // pedal
     { d: "M380,382 m-19,0 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0", width: 4 }, // chainring
-    { d: "M233,372 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0", width: 5 }, // cassette
-    { d: "M376,363 L235,358", width: 2.5 }, // chain top run
-    { d: "M378,401 L250,400", width: 2.5 }, // chain bottom run
-    { d: "M240,386 L248,406", width: 4 }, // derailleur cage
-    { d: "M248,406 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0", width: 3 }, // pulley
-    { d: "M233,372 m-28,0 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0", width: 3.5 }, // rear rotor
-    { d: "M619,372 m-28,0 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0", width: 3.5 }, // front rotor
   ],
   solids: [
     // saddle
