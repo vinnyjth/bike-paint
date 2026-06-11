@@ -3,13 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 import BikeCanvas from "@/components/BikeCanvas";
 import ColorPicker from "@/components/ColorPicker";
+import GeometryPanel from "@/components/GeometryPanel";
 import SavedDesigns from "@/components/SavedDesigns";
-import { TUBE_INFO, TUBE_LABELS } from "@/lib/bikes";
+import { defaultParams, TUBE_INFO, TUBE_LABELS } from "@/lib/bikes";
 import { colorHex } from "@/lib/colors";
-import { loadDesigns, persistDesigns } from "@/lib/storage";
+import {
+  loadDesigns,
+  loadGeometry,
+  persistDesigns,
+  persistGeometry,
+} from "@/lib/storage";
 import {
   BikeShape,
   Design,
+  FrameParams,
   PATTERN_LABELS,
   PatternType,
   Stroke,
@@ -68,6 +75,8 @@ function slotLabels(
 
 export default function Home() {
   const [shape, setShape] = useState<BikeShape>("road");
+  const [customGeo, setCustomGeo] = useState<FrameParams | null>(null);
+  const [geoLabel, setGeoLabel] = useState<string | null>(null);
   const [pattern, setPattern] = useState<PatternType>("one");
   // One shared palette: every pattern reads its colors from the front of this
   // array, so picks carry over cleanly when you switch patterns.
@@ -90,6 +99,13 @@ export default function Home() {
 
   useEffect(() => {
     setDesigns(loadDesigns());
+    const g = loadGeometry();
+    if (g) {
+      setShape(g.shape);
+      // merge over defaults so older stored geometry picks up new fields
+      setCustomGeo(g.custom ? { ...defaultParams(g.shape), ...g.custom } : null);
+      setGeoLabel(g.label);
+    }
   }, []);
 
   const slots = useMemo(
@@ -121,6 +137,27 @@ export default function Home() {
     });
   };
 
+  const applyGeometry = (
+    s: BikeShape,
+    custom: FrameParams | null,
+    label: string | null
+  ) => {
+    setShape(s);
+    setCustomGeo(custom);
+    setGeoLabel(label);
+    persistGeometry({ shape: s, custom, label });
+  };
+
+  const pickShape = (s: BikeShape) => {
+    if (s !== shape) applyGeometry(s, null, null);
+  };
+
+  const importGeometry = (params: FrameParams, s: BikeShape, label: string) =>
+    applyGeometry(s, params, label);
+
+  const changeCustomGeo = (params: FrameParams | null) =>
+    applyGeometry(shape, params, params ? geoLabel : null);
+
   const saveDesign = () => {
     const design: Design = {
       id: crypto.randomUUID(),
@@ -138,6 +175,8 @@ export default function Home() {
       seed,
       locks,
       strokes: pattern === "freestyle" ? strokes : [],
+      geometry: customGeo ?? undefined,
+      geometryLabel: customGeo ? geoLabel ?? undefined : undefined,
       savedAt: Date.now(),
     };
     const next = [design, ...designs];
@@ -147,7 +186,11 @@ export default function Home() {
   };
 
   const loadDesign = (d: Design) => {
-    setShape(d.shape);
+    applyGeometry(
+      d.shape,
+      d.geometry ? { ...defaultParams(d.shape), ...d.geometry } : null,
+      d.geometryLabel ?? null
+    );
     setPattern(d.pattern);
     setPalette(d.palette);
     setSplitAngle(d.splitAngle);
@@ -191,7 +234,7 @@ export default function Home() {
             {(["road", "mountain"] as BikeShape[]).map((s) => (
               <button
                 key={s}
-                onClick={() => setShape(s)}
+                onClick={() => pickShape(s)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium ${
                   shape === s
                     ? "bg-zinc-900 text-white"
@@ -228,6 +271,7 @@ export default function Home() {
             >
               <BikeCanvas
               shape={shape}
+              geometry={customGeo ?? undefined}
               pattern={pattern}
               palette={palette}
               splitAngle={splitAngle}
@@ -252,6 +296,14 @@ export default function Home() {
                 : "Click a tube to lock it to the selected color; click again to unlock."}
             </p>
           </div>
+
+          <GeometryPanel
+            shape={shape}
+            custom={customGeo}
+            customLabel={geoLabel}
+            onCustomChange={changeCustomGeo}
+            onImport={importGeometry}
+          />
 
           {/* Pattern-specific controls */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">

@@ -1,5 +1,27 @@
 export type BikeShape = "road" | "mountain";
 
+/** Real-world frame dimensions: lengths in mm, angles in degrees */
+export interface FrameParams {
+  stack: number;
+  reach: number;
+  seatTubeLength: number;
+  headTubeLength: number;
+  seatTubeAngle: number;
+  headTubeAngle: number;
+  chainstayLength: number;
+  bbDrop: number;
+  /** Fork length along the steering axis, crown to axle (axle-to-crown) */
+  forkLength: number;
+  forkOffset: number;
+  /** Rim bead seat diameter, e.g. 622 for 700c/29", 559 for 26" */
+  rimBsd: number;
+  tireWidth: number;
+  topTubeDia: number;
+  downTubeDia: number;
+  seatTubeDia: number;
+  headTubeDia: number;
+}
+
 export type PatternType =
   | "one"
   | "two"
@@ -46,5 +68,9 @@ export interface Design {
   /** Tube id -> Montana GOLD color name, overrides any pattern */
   locks: Record<string, string>;
   strokes: Stroke[];
+  /** Custom frame dimensions; absent = the shape's stock geometry */
+  geometry?: FrameParams;
+  /** Where the geometry came from, e.g. "Specialized Tarmac SL7 2024 · 56cm" */
+  geometryLabel?: string;
   savedAt: number;
 }

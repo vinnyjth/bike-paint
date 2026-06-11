@@ -28,7 +28,8 @@ export default function SavedDesigns({ designs, onLoad, onDelete }: Props) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-zinc-900">{d.name}</p>
             <p className="text-xs text-zinc-500">
-              {d.shape === "road" ? "Road" : "Mountain"} · {PATTERN_LABELS[d.pattern]}
+              {d.geometryLabel ?? (d.shape === "road" ? "Road" : "Mountain")} ·{" "}
+              {PATTERN_LABELS[d.pattern]}
             </p>
             <div className="mt-1 flex gap-1">
               {d.palette.slice(0, 6).map((name, i) => (

@@ -3,10 +3,11 @@
 import { useMemo, useRef, useState } from "react";
 import { bikeGeometry, VIEW_W, VIEW_H } from "@/lib/bikes";
 import { colorHex } from "@/lib/colors";
-import { BikeShape, PatternType, Stroke } from "@/lib/types";
+import { BikeShape, FrameParams, PatternType, Stroke } from "@/lib/types";
 
 interface Props {
   shape: BikeShape;
+  geometry?: FrameParams;
   pattern: PatternType;
   palette: string[];
   splitAngle: number;
@@ -80,6 +81,7 @@ const RIM = "#3f3f46";
 
 export default function BikeCanvas({
   shape,
+  geometry,
   pattern,
   palette,
   splitAngle,
@@ -97,7 +99,7 @@ export default function BikeCanvas({
   onStrokesChange,
   onTubeClick,
 }: Props) {
-  const geo = bikeGeometry(shape);
+  const geo = useMemo(() => bikeGeometry(shape, geometry), [shape, geometry]);
   const svgRef = useRef<SVGSVGElement>(null);
   const [drawing, setDrawing] = useState(false);
 
@@ -257,9 +259,9 @@ export default function BikeCanvas({
       {/* Wheels */}
       {geo.wheels.map((w, i) => (
         <g key={i}>
-          <circle cx={w.cx} cy={w.cy} r={w.r} fill="none" stroke={TIRE} strokeWidth={13} />
-          <circle cx={w.cx} cy={w.cy} r={w.r - 11} fill="none" stroke={RIM} strokeWidth={5} />
-          <circle cx={w.cx} cy={w.cy} r={7} fill={RIM} />
+          <circle cx={w.cx} cy={w.cy} r={w.r} fill="none" stroke={TIRE} strokeWidth={w.tire} />
+          <circle cx={w.cx} cy={w.cy} r={w.rimR} fill="none" stroke={RIM} strokeWidth={5 * geo.k} />
+          <circle cx={w.cx} cy={w.cy} r={7 * geo.k} fill={RIM} />
         </g>
       ))}
 
@@ -274,10 +276,6 @@ export default function BikeCanvas({
           fill="none"
         />
       ))}
-      {geo.solids.map((d, i) => (
-        <path key={i} d={d} fill={FRAME_DARK} />
-      ))}
-
       {/* Frame tubes */}
       {geo.tubes.map((t, i) => (
         <path
