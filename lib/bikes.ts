@@ -50,10 +50,10 @@ export const ROAD_PARAMS: FrameParams = {
   forkOffset: 50,
   rimBsd: 622,
   tireWidth: 28,
-  topTubeDia: 39,
-  downTubeDia: 51,
-  seatTubeDia: 42,
-  headTubeDia: 57,
+  topTubeDia: 31.8,
+  downTubeDia: 38.1,
+  seatTubeDia: 31.8,
+  headTubeDia: 44,
 };
 
 export const MTB_PARAMS: FrameParams = {
@@ -69,10 +69,10 @@ export const MTB_PARAMS: FrameParams = {
   forkOffset: 45,
   rimBsd: 622,
   tireWidth: 57,
-  topTubeDia: 45,
-  downTubeDia: 54,
-  seatTubeDia: 45,
-  headTubeDia: 63,
+  topTubeDia: 34.9,
+  downTubeDia: 50.8,
+  seatTubeDia: 34.9,
+  headTubeDia: 44,
 };
 
 export function defaultParams(shape: BikeShape): FrameParams {
@@ -120,6 +120,12 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
     headBot[0] - steer[0] * botInset,
     headBot[1] - steer[1] * botInset,
   ];
+  // ...and just shy of the seat tube top, so it pokes past there too
+  const seatInset = Math.min(p.topTubeDia / 2 + 9, p.seatTubeLength * 0.35);
+  const seatAttach: Pt = [
+    seatTop[0] + Math.cos(sta) * seatInset,
+    seatTop[1] - Math.sin(sta) * seatInset,
+  ];
 
   // Level the bike: rotate about the rear axle so both wheels sit on the ground.
   const tilt = Math.atan2(frontAxle[1] - rearAxle[1], frontAxle[0] - rearAxle[0]);
@@ -136,6 +142,7 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
   const lFrontAxle = level(frontAxle);
   const lTopAttach = level(topAttach);
   const lDownAttach = level(downAttach);
+  const lSeatAttach = level(seatAttach);
   const axleY = rearAxle[1];
 
   // Fit to the viewbox, never larger than the stock drawings.
@@ -163,6 +170,7 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
   const HB = px(lHeadBot);
   const TA = px(lTopAttach);
   const DA = px(lDownAttach);
+  const SA = px(lSeatAttach);
   const RA = px(rearAxle);
   const FA = px(lFrontAxle);
 
@@ -173,10 +181,6 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
   const seatUp = norm(BB, ST);
   const headUp = norm(HB, HT);
   // Rigid decorations are placed by offsets in original-art px, scaled by k.
-  const at = (o: Pt, dx: number, dy: number): Pt => [
-    r1(o[0] + dx * k),
-    r1(o[1] + dy * k),
-  ];
   const along = (o: Pt, dir: Pt, dist: number): Pt => [
     r1(o[0] + dir[0] * dist * k),
     r1(o[1] + dir[1] * dist * k),
@@ -187,8 +191,6 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
   ];
   const P = (pt: Pt) => `${pt[0]},${pt[1]}`;
   const line = (a: Pt, b: Pt) => `M${P(a)} L${P(b)}`;
-  const ring = (c: Pt, r: number) =>
-    `M${r1(c[0] - r)},${c[1]} a${r},${r} 0 1,0 ${r1(r * 2)},0 a${r},${r} 0 1,0 ${r1(-r * 2)},0`;
 
   const dia = (mm: number) => r1(mm * s);
   const w = (basePx: number) => r1(basePx * k);
@@ -201,7 +203,7 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
       : line(lerp(HB, FA, 0.36), FA);
 
   const tubes: Tube[] = [
-    { id: "top", label: "Top tube", d: line(ST, TA), width: dia(p.topTubeDia) },
+    { id: "top", label: "Top tube", d: line(SA, TA), width: dia(p.topTubeDia) },
     { id: "down", label: "Down tube", d: line(DA, BB), width: dia(p.downTubeDia) },
     { id: "seat", label: "Seat tube", d: line(BB, ST), width: dia(p.seatTubeDia) },
     { id: "head", label: "Head tube", d: line(HT, HB), width: dia(p.headTubeDia) },
@@ -231,18 +233,9 @@ export function bikeGeometry(shape: BikeShape, params?: FrameParams): BikeGeomet
 
   const accessories =
     shape === "road"
-      ? [
-          { d: line(BB, at(BB, -46, -18)), width: w(7) }, // far crank arm
-          { d: line(BB, at(BB, 53, 20)), width: w(8) }, // drive crank arm
-          { d: line(at(BB, 41, 23), at(BB, 69, 23)), width: w(6) }, // pedal
-          { d: ring(BB, w(23)), width: w(4) }, // chainring
-        ]
+      ? []
       : [
           { d: line(HB, lerp(HB, FA, 0.4)), width: w(12) }, // fork stanchion
-          { d: line(BB, at(BB, -49, -20)), width: w(8) }, // far crank arm
-          { d: line(BB, at(BB, 51, 22)), width: w(9) }, // drive crank arm
-          { d: line(at(BB, 39, 25), at(BB, 67, 25)), width: w(7) }, // pedal
-          { d: ring(BB, w(19)), width: w(4) }, // chainring
         ];
 
   return { tubes, wheels, accessories, k };

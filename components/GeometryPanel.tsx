@@ -31,6 +31,54 @@ const WHEEL_SIZES = [
   { label: '16"', bsd: 305 },
 ];
 
+// Standard bicycle tubing sizes through history, per tube
+const TUBE_SIZES: { key: keyof FrameParams; label: string; options: { mm: number; name: string }[] }[] = [
+  {
+    key: "topTubeDia",
+    label: "Top tube",
+    options: [
+      { mm: 25.4, name: '1" — classic steel' },
+      { mm: 28.6, name: '1⅛" — oversize steel' },
+      { mm: 31.8, name: '1¼" — OS alloy / modern steel' },
+      { mm: 34.9, name: '1⅜" — oversized alloy' },
+      { mm: 38.1, name: '1½" — modern alloy/carbon' },
+    ],
+  },
+  {
+    key: "downTubeDia",
+    label: "Down tube",
+    options: [
+      { mm: 28.6, name: '1⅛" — classic steel' },
+      { mm: 31.8, name: '1¼" — oversize steel' },
+      { mm: 34.9, name: '1⅜" — OS touring/MTB steel' },
+      { mm: 38.1, name: '1½" — alloy' },
+      { mm: 44.5, name: '1¾" — oversized alloy' },
+      { mm: 50.8, name: '2" — fat alloy/carbon' },
+    ],
+  },
+  {
+    key: "seatTubeDia",
+    label: "Seat tube",
+    options: [
+      { mm: 25.4, name: '1" — vintage / BMX' },
+      { mm: 28.6, name: '1⅛" — classic (27.2 post)' },
+      { mm: 31.8, name: '1¼" — oversize (30.9 post)' },
+      { mm: 34.9, name: '1⅜" — modern MTB (31.6 post)' },
+    ],
+  },
+  {
+    key: "headTubeDia",
+    label: "Head tube",
+    options: [
+      { mm: 25.4, name: '1" — classic threaded' },
+      { mm: 28.6, name: '1⅛" — threadless era' },
+      { mm: 31.8, name: '1¼" — 90s Evolution' },
+      { mm: 38.1, name: '1½" — freeride / tapered' },
+      { mm: 44, name: "44mm — modern oversized" },
+    ],
+  },
+];
+
 const SLIDERS: {
   key: keyof FrameParams;
   label: string;
@@ -39,10 +87,6 @@ const SLIDERS: {
   step: number;
   unit: string;
 }[] = [
-  { key: "topTubeDia", label: "Top tube", min: 20, max: 80, step: 1, unit: "mm" },
-  { key: "downTubeDia", label: "Down tube", min: 20, max: 90, step: 1, unit: "mm" },
-  { key: "seatTubeDia", label: "Seat tube", min: 20, max: 80, step: 1, unit: "mm" },
-  { key: "headTubeDia", label: "Head tube", min: 25, max: 90, step: 1, unit: "mm" },
   { key: "seatTubeAngle", label: "Seat tube angle", min: 64, max: 80, step: 0.5, unit: "°" },
   { key: "headTubeAngle", label: "Head tube angle", min: 60, max: 80, step: 0.5, unit: "°" },
   { key: "forkLength", label: "Fork length", min: 300, max: 650, step: 5, unit: "mm" },
@@ -149,6 +193,27 @@ export default function GeometryPanel({
               ))}
             </select>
           </label>
+          <div className="mb-4 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+            {TUBE_SIZES.map(({ key, label, options }) => (
+              <label key={key} className="block text-sm">
+                <span className="font-medium">{label}</span>
+                <select
+                  value={params[key]}
+                  onChange={(e) => setValue(key, Number(e.target.value))}
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-2 py-1"
+                >
+                  {!options.some((o) => o.mm === params[key]) && (
+                    <option value={params[key]}>{params[key]}mm</option>
+                  )}
+                  {options.map((o) => (
+                    <option key={o.mm} value={o.mm}>
+                      {o.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
           <div className="mb-4 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
             {SLIDERS.map(({ key, label, min, max, step, unit }) => (
               <label key={key} className="block text-sm">
