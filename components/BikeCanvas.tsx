@@ -257,9 +257,24 @@ export default function BikeCanvas({
       {/* Wheels */}
       {geo.wheels.map((w, i) => (
         <g key={i}>
-          <circle cx={w.cx} cy={w.cy} r={w.r} fill="none" stroke={TIRE} strokeWidth={11} />
-          <circle cx={w.cx} cy={w.cy} r={w.r - 9} fill="none" stroke={RIM} strokeWidth={5} />
-          <circle cx={w.cx} cy={w.cy} r={7} fill={RIM} />
+          <circle cx={w.cx} cy={w.cy} r={w.r} fill="none" stroke={TIRE} strokeWidth={13} />
+          <circle cx={w.cx} cy={w.cy} r={w.r - 11} fill="none" stroke={RIM} strokeWidth={5} />
+          {Array.from({ length: 18 }, (_, k) => {
+            const a = (k * Math.PI * 2) / 18;
+            return (
+              <line
+                key={k}
+                x1={w.cx + 12 * Math.cos(a)}
+                y1={w.cy + 12 * Math.sin(a)}
+                x2={w.cx + (w.r - 13) * Math.cos(a)}
+                y2={w.cy + (w.r - 13) * Math.sin(a)}
+                stroke="#71717a"
+                strokeWidth={1.5}
+              />
+            );
+          })}
+          <circle cx={w.cx} cy={w.cy} r={12} fill="none" stroke={RIM} strokeWidth={3} />
+          <circle cx={w.cx} cy={w.cy} r={5} fill={FRAME_DARK} />
         </g>
       ))}
 

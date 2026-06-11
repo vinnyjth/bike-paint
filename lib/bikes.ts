@@ -13,7 +13,7 @@ export interface Tube {
 export interface BikeGeometry {
   tubes: Tube[];
   wheels: { cx: number; cy: number; r: number }[];
-  /** Non-painted stroked parts: seatpost, bars, cranks, etc. */
+  /** Non-painted stroked parts: seatpost, bars, drivetrain, etc. */
   accessories: { d: string; width: number }[];
   /** Non-painted filled parts: saddle */
   solids: string[];
@@ -31,61 +31,85 @@ export const TUBE_INFO = [
 
 export const TUBE_LABELS = TUBE_INFO.map((t) => t.label);
 
-// Tube widths: head tube largest, down tube between head and top,
-// top and seat tubes matched.
+// Road geometry scaled from a size-56 race bike at ~0.334 px/mm:
+// 700c wheels, 410mm chainstays, 70mm BB drop, 73.5deg seat tube,
+// 73deg head tube, stack 565 / reach 390. Axles y=378, BB (380,401).
 const road: BikeGeometry = {
   tubes: [
-    { id: "top", label: "Top tube", d: "M336,224 L518,215", width: 13 },
-    { id: "down", label: "Down tube", d: "M532,262 L390,400", width: 16 },
-    { id: "seat", label: "Seat tube", d: "M390,400 L336,224", width: 13 },
-    { id: "head", label: "Head tube", d: "M518,215 L532,262", width: 20 },
-    { id: "seatstay", label: "Seat stays", d: "M339,240 L248,377", width: 8 },
-    { id: "chainstay", label: "Chain stays", d: "M390,400 L248,377", width: 9 },
-    { id: "fork", label: "Fork", d: "M532,262 C546,302 578,345 598,377", width: 10 },
+    { id: "top", label: "Top tube", d: "M327,222 L510,212", width: 13 },
+    { id: "down", label: "Down tube", d: "M525,262 L380,401", width: 17 },
+    { id: "seat", label: "Seat tube", d: "M380,401 L327,222", width: 14 },
+    { id: "head", label: "Head tube", d: "M510,212 L525,262", width: 19 },
+    { id: "seatstay", label: "Seat stays", d: "M329,238 L239,374", width: 7.5 },
+    { id: "chainstay", label: "Chain stays", d: "M380,401 L239,376", width: 8 },
+    { id: "fork", label: "Fork", d: "M525,262 C534,300 562,344 592,378", width: 10 },
   ],
   wheels: [
-    { cx: 248, cy: 377, r: 110 },
-    { cx: 598, cy: 377, r: 110 },
+    { cx: 238, cy: 378, r: 112 },
+    { cx: 592, cy: 378, r: 112 },
   ],
   accessories: [
-    { d: "M336,224 L329,193", width: 8 }, // seatpost
-    { d: "M518,215 L522,200 L558,196", width: 8 }, // stem
-    { d: "M558,196 C584,194 592,212 584,232 C580,243 568,247 559,244", width: 7 }, // drop bar
-    { d: "M390,400 L442,423", width: 8 }, // crank arm
-    { d: "M430,425 L456,425", width: 6 }, // pedal
-    { d: "M390,400 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0", width: 5 }, // chainring
+    { d: "M327,222 L313,174", width: 8 }, // seatpost
+    { d: "M510,212 L505,197", width: 10 }, // steerer + spacers
+    { d: "M505,198 L548,200", width: 9 }, // stem
+    { d: "M548,200 L566,200 C577,201 580,210 578,219 C576,231 566,238 556,236", width: 7 }, // drop bar
+    { d: "M575,206 L586,224", width: 5.5 }, // brake hood/lever
+    { d: "M380,401 L334,383", width: 7 }, // far crank arm
+    { d: "M380,401 L433,421", width: 8 }, // drive crank arm
+    { d: "M421,424 L449,424", width: 6 }, // pedal
+    { d: "M380,401 m-23,0 a23,23 0 1,0 46,0 a23,23 0 1,0 -46,0", width: 4 }, // chainring
+    { d: "M238,378 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0", width: 3.5 }, // cog
+    { d: "M376,378 L240,368", width: 2.5 }, // chain top run
+    { d: "M380,424 L254,409", width: 2.5 }, // chain bottom run
+    { d: "M244,388 L252,408", width: 4 }, // derailleur cage
+    { d: "M252,408 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0", width: 3 }, // pulley
+    { d: "M238,378 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0", width: 3 }, // rear rotor
+    { d: "M592,378 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0", width: 3 }, // front rotor
   ],
   solids: [
-    // saddle, nose pointing forward
-    "M293,190 Q299,180 318,179 Q341,178 354,183 Q364,186 368,190 Q354,196 331,195 Q306,195 293,190 Z",
+    // saddle: flat top, kicked tail, dropped nose
+    "M273,176 Q275,169 290,167 L336,167 Q349,168 356,175 Q341,180 312,180 Q286,180 273,176 Z",
   ],
 };
 
+// MTB scaled from a modern trail hardtail: 29er wheels, 435mm stays,
+// slack 64.5deg head angle, steep 74deg seat tube, long reach.
+// Stanchions are dark metal; the painted "fork" tube is the lowers.
 const mountain: BikeGeometry = {
   tubes: [
-    { id: "top", label: "Top tube", d: "M354,258 L545,207", width: 15 },
-    { id: "down", label: "Down tube", d: "M560,238 L395,405", width: 18 },
-    { id: "seat", label: "Seat tube", d: "M395,405 L350,250", width: 15 },
-    { id: "head", label: "Head tube", d: "M545,205 L560,240", width: 22 },
-    { id: "seatstay", label: "Seat stays", d: "M354,272 L246,375", width: 9 },
-    { id: "chainstay", label: "Chain stays", d: "M395,405 L246,375", width: 10 },
-    { id: "fork", label: "Fork", d: "M560,240 L639,375", width: 16 },
+    { id: "top", label: "Top tube", d: "M345,252 L528,180", width: 15 },
+    { id: "down", label: "Down tube", d: "M546,205 L382,382", width: 18 },
+    { id: "seat", label: "Seat tube", d: "M380,382 L341,247", width: 15 },
+    { id: "head", label: "Head tube", d: "M532,173 L546,205", width: 21 },
+    { id: "seatstay", label: "Seat stays", d: "M345,262 L234,368", width: 9 },
+    { id: "chainstay", label: "Chain stays", d: "M380,382 L234,371", width: 10 },
+    { id: "fork", label: "Fork", d: "M573,264 L619,372", width: 16 },
   ],
   wheels: [
-    { cx: 246, cy: 375, r: 115 },
-    { cx: 639, cy: 375, r: 115 },
+    { cx: 233, cy: 372, r: 118 },
+    { cx: 619, cy: 372, r: 118 },
   ],
   accessories: [
-    { d: "M350,250 L339,197", width: 9 }, // dropper post
-    { d: "M545,205 L552,188", width: 9 }, // stem
-    { d: "M514,186 L596,190", width: 8 }, // flat bar
-    { d: "M395,405 L447,429", width: 9 }, // crank arm
-    { d: "M435,431 L461,431", width: 7 }, // pedal
-    { d: "M395,405 m-21,0 a21,21 0 1,0 42,0 a21,21 0 1,0 -42,0", width: 5 }, // chainring
+    { d: "M546,205 L576,272", width: 12 }, // fork stanchion
+    { d: "M341,247 L331,202", width: 9 }, // dropper post
+    { d: "M532,173 L528,163", width: 10 }, // steerer
+    { d: "M528,164 L552,160", width: 9 }, // stem
+    { d: "M516,156 L588,164", width: 8 }, // flat bar
+    { d: "M380,382 L331,362", width: 8 }, // far crank arm
+    { d: "M380,382 L431,404", width: 9 }, // drive crank arm
+    { d: "M419,407 L447,407", width: 7 }, // pedal
+    { d: "M380,382 m-19,0 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0", width: 4 }, // chainring
+    { d: "M233,372 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0", width: 5 }, // cassette
+    { d: "M376,363 L235,358", width: 2.5 }, // chain top run
+    { d: "M378,401 L250,400", width: 2.5 }, // chain bottom run
+    { d: "M240,386 L248,406", width: 4 }, // derailleur cage
+    { d: "M248,406 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0", width: 3 }, // pulley
+    { d: "M233,372 m-28,0 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0", width: 3.5 }, // rear rotor
+    { d: "M619,372 m-28,0 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0", width: 3.5 }, // front rotor
   ],
   solids: [
-    // saddle, slightly chunkier than the road one
-    "M303,196 Q309,184 328,183 Q350,182 362,188 Q371,191 374,196 Q360,202 337,201 Q314,201 303,196 Z",
+    // saddle
+    "M291,201 Q293,193 309,191 L347,191 Q360,193 366,200 Q351,206 324,206 Q302,206 291,201 Z",
   ],
 };
 
